@@ -1,0 +1,8 @@
+Test da fare
+
+[] Controllare che MLP con e senza residui funzioni con mnist (stasera)
+[] Controllare che CNNET con e senza residui funzioni con cifar10 (stasera)
+[] Fare gradcam 
+[] Fare i test su wandb e salvare i plot (stasera)
+
+[] Fare readme (stasera)

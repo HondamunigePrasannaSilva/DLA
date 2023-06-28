@@ -7,9 +7,15 @@ class block(nn.Module):
     def __init__(self, in_channels, out_channels,stride=1):
         super(block, self).__init__()
         
-        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0)
 
-        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=stride, padding=1)
+        self.seq = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(),
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=stride, padding=1),
+            nn.BatchNorm2d(out_channels),
+
+        )
 
         self.relu = nn.ReLU()
 
@@ -17,13 +23,11 @@ class block(nn.Module):
     def forward(self, x):
         identity = x
 
-        x = self.conv1(x)
-        x = self.relu(x)
-
-        x = self.conv2(x)
-        x = self.relu(x)
-
+        x = self.seq(x)
+        
         x = x+identity
+        
+        x = self.relu(x)
         
         return x
     
@@ -32,7 +36,7 @@ class CNNNet(nn.Module):
         super(CNNNet, self).__init__()
         
 
-        self.in_channels = 64
+        self.in_channels = 128
         self.conv1 = nn.Conv2d(image_channels, self.in_channels, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = nn.BatchNorm2d(self.in_channels)
         self.relu = nn.ReLU()
@@ -43,7 +47,7 @@ class CNNNet(nn.Module):
         
 
         self.avgpool = nn.AdaptiveAvgPool2d((1,1))
-        self.fc = nn.Linear(64, num_classes)
+        self.fc = nn.Linear(self.in_channels, num_classes)
     
     def forward(self,x):
         x = self.conv1(x)
@@ -52,12 +56,14 @@ class CNNNet(nn.Module):
         x = self.maxpool(x)
 
         x = self.layer1(x)
-    
+        output = x  #[256, 64, 8, 8]
+
         x = self.avgpool(x)
-        x = x.reshape(x.shape[0], -1)
+        x = x.reshape(x.shape[0], -1)   #[128]
+        output_gap = x
         x = self.fc(x)
 
-        return x
+        return x, output, output_gap
 
 
     def _make_layer(self, block, num_block):
