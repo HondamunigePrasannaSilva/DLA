@@ -4,6 +4,7 @@ from torch.utils.data import Subset
 import torchvision.transforms as transforms
 import torch
 import numpy as np
+import cv2
 
 def getData(batch_size = 32):
 
@@ -68,13 +69,13 @@ def getSTL(batch_size = 32):
     testset = STL10(root='./data', split="test",download=True, transform=transform)
 
     # Split train into train and validation.
-    val_size = 5000
-    I = np.random.permutation(len(trainset))
-    ds_val = Subset(trainset, I[:val_size])
-    ds_train = Subset(trainset, I[val_size:])
+    val_size = 2000
+    I = np.random.permutation(len(testset))
+    ds_val = Subset(testset, I[:val_size])
+    ds_test = Subset(testset, I[val_size:])
 
-    trainloader = torch.utils.data.DataLoader(ds_train, batch_size=batch_size,shuffle=True, num_workers=8)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,shuffle=False, num_workers=8)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,shuffle=True, num_workers=8)
+    testloader = torch.utils.data.DataLoader(ds_test, batch_size=batch_size,shuffle=False, num_workers=8)
     val_dataloader = torch.utils.data.DataLoader(ds_val, batch_size=batch_size,  num_workers=8)
 
 
