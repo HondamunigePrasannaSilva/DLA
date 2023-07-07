@@ -12,9 +12,9 @@ import matplotlib.pyplot as plt
 import cv2
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
+from utils import *
 hyperparameters = {
-    'epochs' : 50, 
+    'epochs' : 100, 
     'lr' : 0.001, 
     'batch_size' : 256, 
     'input_size' : 32*32, 
@@ -38,6 +38,8 @@ def model_pipeline():
 
         #test the model
         print("Accuracy test: ",test(model, testloader))
+
+        make_gif(titolo="prova", k = config.epochs)
         
     return model
 
@@ -81,11 +83,14 @@ def train(model, trainloader, criterion, optimizer, validationloader,testloader,
         wandb.log({"epoch":epoch, "loss":np.mean(losses)})
         
 
-        if epoch%1==0:
+        if epoch%5==0:
             val = test(model, validationloader)
             acc = test(model, testloader)
             wandb.log({"validation_accuracy":val, "test_accuracy":acc})
             torch.save(model.state_dict(), "SLT.pt")
+        
+        if epoch%1==0:
+            cam_test(model, testloader, epoch)
 
     return #np.mean(losses)
 
@@ -122,12 +127,13 @@ def test(model, test_loader):
 
             correct += (predicated == labels).sum().item()
 
-    cam_test(model, test_loader)
+   # cam_test(model, test_loader)
     return correct/total
     
 import torchvision.utils as vutils
+classes = ['airplane','bird','car','cat','deer','dog','horse','monkey','ship','truck']
 
-def cam_test(model, test_loader):
+def cam_test(model, test_loader, epoch):
     model.eval()
     with torch.no_grad():
         correct, total = 0, 0
@@ -139,32 +145,55 @@ def cam_test(model, test_loader):
             _, predicated = torch.max(oututs.data, 1)
             total += labels.size(0)
             correct += (predicated == labels).sum().item()
-            k = 6
-            vutils.save_image(images[k], "image.jpg")
-            c = torch.sum(b_gap[k]*a_gap[k][:,None, None], dim = 0)
-            # c  = cam 
-            # Normalize
-            c = (c-torch.min(c))/(torch.max(c)-torch.min(c))
             
-            cam_img = np.uint8(255 * c.cpu().numpy())
+            image_labels, image_paths = [], []
 
-            hm = cv2.applyColorMap(cv2.resize(cam_img, (96, 96)), cv2.COLORMAP_JET)
-            re = hm*0.3+(images[k].permute(1,2,0).cpu().numpy()*255 )*0.5
+            for i in range(5):
 
-            cv2.imwrite('CAM.jpg', re)
-            """transform = T.Resize(size = (96,96))
-            c_ = transform(c[1, None, None])
-            vutils.save_image(c_, "image_1.jpg")
-            vutils.save_image(c, "image_2.jpg")
-            fig = plt.figure(figsize =(10, 10))
-            plt.imshow(c_.permute(1, 2, 0).cpu())
-            fig.savefig("im.png")
-"""
+                k = i
+                # TODO
+                # GET THE WEIGHTS OF THE CLASS PREDICTED OR THE TRUE CLASS
+                #
+                vutils.save_image(images[k], f"Lab1/img/image{i}.jpg")
+                c = torch.sum(b_gap[k]*a_gap[k][:,None, None], dim = 0)
 
+                c = (c-torch.min(c))/(torch.max(c)-torch.min(c))
+            
+                cam_img = np.uint8(255 * c.cpu().numpy())
+
+                hm = cv2.applyColorMap(cv2.resize(cam_img, (96, 96)), cv2.COLORMAP_JET)
+            
+                re = hm*0.3+(images[k].permute(1,2,0).cpu().numpy()*255 )*0.4
+
+                cv2.imwrite(f"Lab1/img/CAM{i}.jpg", re)
+
+                image_labels.append(classes[labels[k]]+"-"+classes[predicated[k]])
+                image_paths.append(f"Lab1/img/CAM{i}.jpg")
+
+
+            plot_images(image_paths, image_labels, epoch)
 
             break
 
     return 
+
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+
+def plot_images(images, labels, epoch):
+    fig, axs = plt.subplots(1, 5, figsize=(15, 4))  # Create a figure with 1 row and 5 columns
+
+    for i, image_path in enumerate(images):
+        img = mpimg.imread(image_path)  # Read the image using Matplotlib's image module
+        axs[i].imshow(img)  # Display the image in the corresponding subplot
+        axs[i].axis('off')  # Hide the axes
+        axs[i].set_title(labels[i], fontsize=20)  # Set the title/label for the image
+
+    plt.tight_layout()  # Adjust the spacing between subplots
+    plt.figtext(0.5, 0.05, "Epoch:"+str(epoch), ha='center', fontsize=20)
+    plt.savefig(f"Lab1/img/forgif/{epoch}.png")  # Display the figure
+    plt.close()
+
 
 if __name__ == "__main__":
     

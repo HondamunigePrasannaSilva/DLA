@@ -61,7 +61,7 @@ def getDataCifar(batch_size = 32):
 def getSTL(batch_size = 32):
     transform = transforms.Compose(
     [transforms.ToTensor(),
-     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+     #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
      ])
 
 
