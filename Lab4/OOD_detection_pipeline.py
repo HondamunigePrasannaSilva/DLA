@@ -14,16 +14,16 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.metrics import RocCurveDisplay
+from sklearn.metrics import RocCurveDisplay, precision_recall_curve, PrecisionRecallDisplay
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 classes = ['airplane','bird','car','cat','deer','dog','horse','monkey','ship','truck']
 
 hyperparameters = {
-    'epochs' :1, 
-    'lr' : 0.001, 
-    'batch_size' : 256
+    'epochs' :601, 
+    'lr' : 0.01, 
+    'batch_size' : 512
 }
 
 
@@ -34,10 +34,10 @@ def model_pipeline():
         config = wandb.config
 
         #make the model, data and optimization problem
-        model, criterion, optimizer, trainloader, testloader, validationloader, valloaderOOD = create(config)
+        model, criterion, optimizer, trainloader, testloader, validationloader, valloaderOOD, scheduler = create(config)
 
         #train the model
-        model_trained = train(model, trainloader, criterion, optimizer, validationloader,testloader, config)
+        model_trained = train(model, trainloader, criterion, optimizer, validationloader,testloader, config, scheduler)
 
         #test the model
         print("Accuracy test: ",test(model, testloader))
@@ -55,15 +55,16 @@ def create(config):
     
     #Create the loss and optimizer
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.01,momentum=0.9, weight_decay=5e-4)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=200)
 
     trainloader,testloader,validationloader = getDataCifar(batch_size=config.batch_size)
     _,_,valloaderOOD = getDataCifar100(batch_size=config.batch_size)
 
-    return model, criterion, optimizer,trainloader, testloader, validationloader, valloaderOOD
+    return model, criterion, optimizer,trainloader, testloader, validationloader, valloaderOOD, scheduler
 
 
-def train(model, trainloader, criterion, optimizer, validationloader,testloader, config):
+def train(model, trainloader, criterion, optimizer, validationloader,testloader, config, scheduler):
     
     #telling wand to watch
     if wandb.run is not None:
@@ -90,8 +91,15 @@ def train(model, trainloader, criterion, optimizer, validationloader,testloader,
         if epoch%5==0:
             val = test(model, validationloader)
             acc = test(model, testloader)
-            wandb.log({"validation_accuracy":val, "test_accuracy":acc})
-            torch.save(model.state_dict(), "cifar10.pt")
+
+            if wandb.run is not None:
+                wandb.log({"validation_accuracy":val, "test_accuracy":acc})
+            
+            print(f"Validation accuracy:{val}, Test Accuracy:{acc}")    
+            
+            torch.save(model.state_dict(), "cifar10_2.pt")
+        
+        scheduler.step()
 
 
     return model
@@ -131,13 +139,14 @@ def test(model, test_loader):
 
     return correct/total
 
-def OOD_pipeline(model, dl_test, dl_fake):
+def OOD_pipeline(model, dl_test, dl_fake , datasetname = 'CIFAR10'):
 
     # Function to collect all logits from the model on entire dataset.
     def collect_logits(model, dl):
         logits = []
         with torch.no_grad():
             for (Xs, _) in dl:
+                Xs = Xs.to(device) 
                 logits.append(model(Xs.to(device)).cpu().numpy())
         return np.vstack(logits)
 
@@ -151,8 +160,10 @@ def OOD_pipeline(model, dl_test, dl_fake):
     #list_OOD_ = [[logits_OOD[i].mean(), logits_OOD[i].std()] for i in range(len(logits_OOD) )]
 
     # with variance
-    list_ID_ = [ logits_ID[i].var()   for i in range(len(logits_ID)  )]
-    list_OOD_ = [ logits_OOD[i].var() for i in range(len(logits_OOD) )]
+    #list_ID_ = [sum(logits_ID[i]) for i in range(len(logits_ID)  )]
+    #list_OOD_ = [sum(logits_OOD[i]) for i in range(len(logits_OOD)  )]
+    list_ID_ = [ logits_ID[i].std()   for i in range(len(logits_ID)  )]
+    list_OOD_ = [ logits_OOD[i].std() for i in range(len(logits_OOD) )]
     
     scores = list_ID_ + list_OOD_
 
@@ -162,15 +173,34 @@ def OOD_pipeline(model, dl_test, dl_fake):
     plt.axis("square")
     plt.xlabel("False Positive Rate")
     plt.ylabel("True Positive Rate")
-    plt.title("OOD Detetection on CIFAR 10")
+    plt.title(f"OOD Detetection on {datasetname}")
     plt.legend()
-    plt.savefig("Lab4/prova.png")
+    plt.savefig("./Lab4/imgs/AUROC.png")
+    plt.clf()
 
-    ##########################################
-    # MANCA PLOT CON PRECISION RECALL
-    ##########################################
+
+    precision, recall, _ = precision_recall_curve(y, scores)
+    disp = PrecisionRecallDisplay(precision=precision, recall=recall)
+    disp.plot()
+    plt.xlabel("Recall")
+    plt.ylabel("Precision")
+    plt.title(f"OOD Detetection on {datasetname}")
+    plt.legend()
+    plt.savefig("./Lab4/imgs/AUPR.png")
+    plt.clf()
+
 
 
 if __name__ == "__main__":
     
-    model_pipeline()
+    #model_pipeline()
+    
+    model = classifiers['resnet18'].to(device)
+    model.load_state_dict(torch.load("/home/hsilva/DLA/cifar10.pt"))
+
+    _,_,validationloader = getDataCifar(batch_size=256)
+    _,_,valloaderOOD = getDataCifar100(batch_size=256)
+
+    OOD_pipeline(model, validationloader, valloaderOOD)
+
+

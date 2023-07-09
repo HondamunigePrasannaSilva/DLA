@@ -159,7 +159,7 @@ def CreateResNet2D(img_channels=3, num_classes = 10):
 
 # dict used to get classifiers 
 classifiers = {
-    'classifier_a': classifier_a(inchannels=3),'classifier_b': classifier_b(inchannels=3),
+    'classifier_a': classifier_a(inchannels=1),'classifier_b': classifier_b(inchannels=1),
     'resnet18':ResNet(block_resnet2d, image_channels=3, num_classes=10)
 }
 
