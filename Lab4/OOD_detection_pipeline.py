@@ -63,7 +63,6 @@ def create(config):
 
     return model, criterion, optimizer,trainloader, testloader, validationloader, valloaderOOD, scheduler
 
-
 def train(model, trainloader, criterion, optimizer, validationloader,testloader, config, scheduler):
     
     #telling wand to watch

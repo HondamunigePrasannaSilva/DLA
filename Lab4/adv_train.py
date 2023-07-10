@@ -22,8 +22,11 @@ classes = ['airplane','bird','car','cat','deer','dog','horse','monkey','ship','t
 
 """
     In this file you can do adversarial training and check if a 
-    more robust model on perturbated images.
-    The attack used is FGSM!
+    more robust model on perturbated images.The attack used is FGSM!
+    
+    If you want to train a classifier and then test adv example con it, set
+        - adv_train = False
+
 """
 
 hyperparameters = {
@@ -31,7 +34,7 @@ hyperparameters = {
     'lr' : 0.01, 
     'batch_size' : 256,
     'log':'disabled',
-    'model':'classifier_a',
+    'model':'classifier_a', # classifier_a or classifier_b
     'adv_train': False,
     'eps':0.3
 }
@@ -158,7 +161,7 @@ def createAdversarialImages(model, dataloader,criterion, eps):
     for i, (images, label) in enumerate(dataloader):
         images, label = images.to(device), label.to(device)
         if i == 0:    
-            adv_images, _ = fgsm_attack(model, criterion, images,label, eps = eps, target = False)
+            adv_images, _ = fgsm_attack(model, criterion, images,label, eps = eps, target = True)
             l = label
         else:
             
