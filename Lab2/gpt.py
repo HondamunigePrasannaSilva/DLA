@@ -4,7 +4,7 @@ from torch.nn import functional as F
 from tqdm import tqdm 
 
 # hyperparameters
-batch_size = 1024 # how many independent sequences will we process in parallel?
+batch_size = 256 # how many independent sequences will we process in parallel?
 block_size = 256 # what is the maximum context length for predictions?
 max_iters = 5000
 eval_interval = 500
@@ -19,7 +19,7 @@ dropout = 0.2
 
 torch.manual_seed(1337)
 
-with open('./Lab2/input.txt', 'r', encoding='utf-8') as f:
+with open('/home/hsilva/DLA/Lab2/input.txt', 'r', encoding='utf-8') as f:
     text = f.read()
 
 # here are all the unique characters that occur in this text
@@ -194,41 +194,49 @@ class GPTLanguageModel(nn.Module):
             # append sampled index to the running sequence
             idx = torch.cat((idx, idx_next), dim=1) # (B, T+1)
         return idx
-model = GPTLanguageModel()
-model = model.to(device)
-# print the number of parameters in the model
-print(sum(p.numel() for p in model.parameters())/1e6, 'M parameters')
-
-# create a PyTorch optimizer
-optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
-
-#progress_bar = tqdm(total=max_iters,unit='step', leave=True)
-
-for iter in tqdm(range(max_iters)):
-
-    # every once in a while evaluate the loss on train and val sets
-    if iter % eval_interval == 0 or iter == max_iters - 1:
-        losses = estimate_loss()
-        print(f"step {iter}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
-
-    # sample a batch of data
-    xb, yb = get_batch('train')
-
-    # evaluate the loss
-    logits, loss = model(xb, yb)
-    optimizer.zero_grad(set_to_none=True)
-    loss.backward()
-    optimizer.step()
-
-    """ progress_bar.update(1)
-    logs = {"loss": loss.detach().item()}
-    progress_bar.set_postfix(**logs)
-    losses.append(loss.item())"""
 
 
+def modelpipeline():
+
+    model = GPTLanguageModel()
+    model = model.to(device)
+    # print the number of parameters in the model
+    print(sum(p.numel() for p in model.parameters())/1e6, 'M parameters')
+
+    # create a PyTorch optimizer
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+
+    #progress_bar = tqdm(total=max_iters,unit='step', leave=True)
+
+    for iter in tqdm(range(max_iters)):
+
+        # every once in a while evaluate the loss on train and val sets
+        if iter % eval_interval == 0 or iter == max_iters - 1:
+            losses = estimate_loss()
+            print(f"step {iter}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
+
+        # sample a batch of data
+        xb, yb = get_batch('train')
+
+        # evaluate the loss
+        logits, loss = model(xb, yb)
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        optimizer.step()
+
+        if iter % 500 == 0:
+            torch.save(model.state_dict(), f"./Lab2/Models/nanogpt_{iter}.pt")
+        
+        """ progress_bar.update(1)
+        logs = {"loss": loss.detach().item()}
+        progress_bar.set_postfix(**logs)
+        losses.append(loss.item())"""
 
 
-# generate from the model
-context = torch.zeros((1, 1), dtype=torch.long, device=device)
-print(decode(model.generate(context, max_new_tokens=500)[0].tolist()))
-#open('more.txt', 'w').write(decode(m.generate(context, max_new_tokens=10000)[0].tolist()))
+
+
+    # generate from the model
+
+    context = torch.zeros((1, 1), dtype=torch.long, device=device)
+    print(decode(model.generate(context, max_new_tokens=500)[0].tolist()))
+    #open('more.txt', 'w').write(decode(m.generate(context, max_new_tokens=10000)[0].tolist()))
