@@ -17,7 +17,8 @@ encoded_dataset = dataset.map(lambda example: tokenizer(example['text'], truncat
 class GPT2Classifier(GPT2PreTrainedModel):
     def __init__(self, config):
         super(GPT2Classifier, self).__init__(config)
-        self.gpt2 = GPT2Model(config)
+        
+        self.gpt2 = GPT2Model.from_pretrained("gpt2")
         self.classifier = nn.Linear(config.hidden_size, 2)
 
     def forward(self, input_ids, attention_mask):
