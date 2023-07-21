@@ -83,3 +83,9 @@ Set log = 'run' if you want to log using wandb
 
 
 ### Plot using linear vs non linear layer on top of GPT2 model
+
+#### Non linear layer
+![](img/finetune2_nl.png)
+
+#### linear layer
+![](img/finetune3.png)

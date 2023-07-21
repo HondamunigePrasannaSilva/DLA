@@ -4,9 +4,10 @@ import torch
 # mettere una
 # Implementing resnet18  
 class block(nn.Module):
-    def __init__(self, in_channels, out_channels,stride=1):
+    def __init__(self, in_channels, out_channels,res, stride=1):
         super(block, self).__init__()
         
+        self.res = res
 
         self.seq = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0),
@@ -25,14 +26,14 @@ class block(nn.Module):
 
         x = self.seq(x)
         
-        x = x+identity
-        
-        x = self.relu(x)
+        if self.res == True:
+            x = x+identity
+            x = self.relu(x)
         
         return x
     
 class CNNNet(nn.Module):
-    def __init__(self, block, image_channels, num_classes, num_hidden_block):
+    def __init__(self, block, image_channels, num_classes, num_hidden_block, residual):
         super(CNNNet, self).__init__()
         
 
@@ -43,7 +44,7 @@ class CNNNet(nn.Module):
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
 
-        self.layer1 = self._make_layer(block, num_hidden_block)
+        self.layer1 = self._make_layer(block, num_hidden_block, residual)
         
 
         self.avgpool = nn.AdaptiveAvgPool2d((1,1))
@@ -66,15 +67,15 @@ class CNNNet(nn.Module):
         return x, output, output_gap
 
 
-    def _make_layer(self, block, num_block):
+    def _make_layer(self, block, num_block, res):
         layers = []
 
         for i in range(1, num_block):
-            layers.append(block(self.in_channels,self.in_channels))
+            layers.append(block(self.in_channels,self.in_channels, res))
 
         return nn.Sequential(*layers)
 
    
 
-def CNNNet_(img_channels=3, num_classes = 10):
-    return CNNNet(block, image_channels=img_channels, num_classes=num_classes, num_hidden_block = 5)
+def CNNNet_(img_channels=3, num_classes = 10, num_bloc = 5, res = False):
+    return CNNNet(block, image_channels=img_channels, num_classes=num_classes, num_hidden_block = num_bloc, residual = res)

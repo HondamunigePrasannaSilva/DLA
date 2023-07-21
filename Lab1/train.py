@@ -18,19 +18,19 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 from utils import *
 hyperparameters = {
-    'epochs' : 100, 
+    'epochs' : 36, 
     'lr' : 0.001, 
     'batch_size' : 256, 
     'input_size' : 28*28, 
-    'width' : 16, 
-    'depth' : 5, 
+    'res' : 'true', 
+    'depth' : 20, 
 }
 
 
 
 def model_pipeline():
 
-    with wandb.init(project="DLA-LAB1", config=hyperparameters, mode="disabled"):
+    with wandb.init(project="DLA-LAB1", config=hyperparameters, mode="run"):
         #access all HPs through wandb.config, so logging matches executing
         config = wandb.config
 
@@ -50,17 +50,16 @@ def model_pipeline():
 def create(config):
     
     #Create a model
-    model = MLP(block_, hidden_size=config.width, num_hidden_layers=config.depth, output_size=10, image_size=config.input_size).to(device)
+    #model = MLP(block_, hidden_size=config.width, num_hidden_layers=config.depth, output_size=10, image_size=config.input_size).to(device)
 
-    #model = CNNNet_().to(device)
-    nparameters = sum(p.numel() for p in model.parameters())
-    #print(nparameters)
+    model = CNNNet_(num_bloc = config.depth, res = True).to(device)
+
     #Create the loss and optimizer
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
 
     #trainloader,testloader,validationloader = getSTL(batch_size=config.batch_size)
-    trainloader,testloader,validationloader = getData(batch_size=config.batch_size)
+    trainloader,testloader,validationloader = getDataCifar(batch_size=config.batch_size)
 
     return model, criterion, optimizer,trainloader, testloader, validationloader
 
@@ -108,8 +107,8 @@ def train_batch(images, labels, model, optimizer, criterion):
     optimizer.zero_grad()
 
     # forward pass
-    #outputs, _, _ = model(images)
-    outputs = model(images)
+    outputs, _, _ = model(images)
+    #outputs = model(images)
     loss = criterion(outputs, labels)
     
     #backward pass
@@ -127,15 +126,18 @@ def test(model, test_loader):
         correct, total = 0, 0
         for images, labels in test_loader:
             images, labels = images.to(device), labels.to(device)
-            #oututs, _, _ = model(images)
-            oututs = model(images)
+            oututs, _, _ = model(images)
+            #oututs = model(images)
             _, predicated = torch.max(oututs.data, 1)
             total += labels.size(0)
 
             correct += (predicated == labels).sum().item()
-
+    
+    model.train()
    # cam_test(model, test_loader)
     return correct/total
+    
+    
     
 classes = ['airplane','bird','car','cat','deer','dog','horse','monkey','ship','truck']
 
