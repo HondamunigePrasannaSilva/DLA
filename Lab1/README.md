@@ -15,7 +15,9 @@ Implement a Convolutional nerual network with residual connection to classify th
 
 A simple test to demostrate that deeper networks without residual connection not always work better and **even deeper** ones *with* residual connections.
 
+![](img/cnnres.png)
 
+in red residual CNN with residual, in green CNN without residual.
 
 # Explain the prediction of a CNN
 In this exercise will use [*Class Activation Maps*](http://cnnlocalization.csail.mit.edu/#:~:text=A%20class%20activation%20map%20for,decision%20made%20by%20the%20CNN.): to view where the network focus to classify.

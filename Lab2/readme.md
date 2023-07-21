@@ -72,6 +72,7 @@ This code can be found **textClassification.py**
 
 Finetuning GPT2 model for text classification on **rotten tomatoes** dataset using a linear classifier and a non linear classifier. Model and dataset from hugging face.
 
+**rotten tomatoes** : Movie review dataset with positive/negative label
 
 to run the code, for more configuration see inside the file. Set linear=True for linear classification otherwise False for **non** linear classifier.
 
@@ -81,6 +82,7 @@ $python textClassifcation.py --epochs=20 --linear=True --batch_size=128, --log='
 
 Set log = 'run' if you want to log using wandb
 
+The idea is to finetune using two type of classifier, linear and a non linear.
 
 ### Plot using linear vs non linear layer on top of GPT2 model
 
