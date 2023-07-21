@@ -4,9 +4,9 @@ import torch
     This class implements a Multi Layer Perceptron with residual connection
 """
 
-class block(nn.Module):
+class block_(nn.Module):
     def __init__(self, hidden_size, residual = None) :
-        super(block, self).__init__()
+        super(block_, self).__init__()
         
         self.residual = residual
         self.linear = nn.Linear(hidden_size, hidden_size, bias = False)
