@@ -3,7 +3,6 @@ wandb/
 __pycache__/
 dump/
 data/
-*.png
 *.jpg
 *.pt
 imgs/
