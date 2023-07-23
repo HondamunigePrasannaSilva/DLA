@@ -1,4 +1,4 @@
-# Laboratory on Large Language Models
+# Laboratory 2: Large Language Models
 
 This laboratory is about working with Large Language Models (e.g. GPT and BERT) to do various useful things. 
 
