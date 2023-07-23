@@ -18,19 +18,19 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 from utils import *
 hyperparameters = {
-    'epochs' : 36, 
+    'epochs' : 101, 
     'lr' : 0.001, 
-    'batch_size' : 256, 
+    'batch_size' : 128, 
     'input_size' : 28*28, 
     'res' : 'true', 
-    'depth' : 20, 
+    'depth' : 5, 
 }
 
 
 
 def model_pipeline():
 
-    with wandb.init(project="DLA-LAB1", config=hyperparameters, mode="run"):
+    with wandb.init(project="DLA-LAB1", config=hyperparameters, mode="disabled"):
         #access all HPs through wandb.config, so logging matches executing
         config = wandb.config
 
@@ -58,8 +58,8 @@ def create(config):
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
 
-    #trainloader,testloader,validationloader = getSTL(batch_size=config.batch_size)
-    trainloader,testloader,validationloader = getDataCifar(batch_size=config.batch_size)
+    trainloader,testloader,validationloader = getSTL(batch_size=config.batch_size)
+    #trainloader,testloader,validationloader = getDataCifar(batch_size=config.batch_size)
 
     return model, criterion, optimizer,trainloader, testloader, validationloader
 
@@ -93,8 +93,8 @@ def train(model, trainloader, criterion, optimizer, validationloader,testloader,
             wandb.log({"validation_accuracy":val, "test_accuracy":acc})
             #torch.save(model.state_dict(), "SLT.pt")
         
-        #if epoch%1==0:
-        #    cam_test(model, testloader, epoch)
+        if epoch%1==0:
+            cam_test(model, testloader, epoch)
 
     return #np.mean(losses)
 
@@ -134,14 +134,19 @@ def test(model, test_loader):
             correct += (predicated == labels).sum().item()
     
     model.train()
-   # cam_test(model, test_loader)
+
+    #cam_test(model, test_loader, epoch)
     return correct/total
     
     
     
-classes = ['airplane','bird','car','cat','deer','dog','horse','monkey','ship','truck']
 
 def cam_test(model, test_loader, epoch):
+    
+    classes = ['airplane','bird','car','cat','deer','dog','horse','monkey','ship','truck']
+
+    params = [param for param in model.parameters()]
+    
     model.eval()
     with torch.no_grad():
         correct, total = 0, 0
@@ -159,12 +164,17 @@ def cam_test(model, test_loader, epoch):
             for i in range(5):
 
                 k = i
-                # TODO
-                # GET THE WEIGHTS OF THE CLASS PREDICTED OR THE TRUE CLASS
-                #
                 vutils.save_image(images[k], f"Lab1/img/image{i}.jpg")
-                c = torch.sum(b_gap[k]*a_gap[k][:,None, None], dim = 0)
 
+                # for cam using only the weights of the class predicted
+                 
+                #weights = params[-2][predicated[i].item()].detach()
+                #c = torch.sum(b_gap[k]*weights[:,None, None], dim = 0)
+
+                #using global average pooling parameters
+
+                c = torch.sum(b_gap[k]*a_gap[k][:,None, None], dim = 0)
+                
                 c = (c-torch.min(c))/(torch.max(c)-torch.min(c))
             
                 cam_img = np.uint8(255 * c.cpu().numpy())
@@ -183,6 +193,7 @@ def cam_test(model, test_loader, epoch):
 
             break
 
+    model.train()
     return 
 
 

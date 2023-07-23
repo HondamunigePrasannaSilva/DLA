@@ -2,8 +2,7 @@
 
 This laboratory is about working with Large Language Models (e.g. GPT and BERT) to do various useful things. 
 
-## Warmup Exercise
-This code can be found on the notebook: **Lab2-LLMs.ipynb**
+
 
 ## Exercise 1
 This first exercise use a *small* autoregressive GPT model for character generation (the one used by Karpathy in his video) to generate text in the style of Dante Aligheri. Using this [file](https://archive.org/stream/ladivinacommedia00997gut/1ddcd09.txt), which contains the entire text of Dante's Inferno.
@@ -28,9 +27,12 @@ per consie in cie; e giustizzar li arsi
 
 per non quel che posa 
 ```
+This code can be found on the notebook: **Lab2-LLMs.ipynb**
 
 ## Exercise 2
 This exercise use the [Hugging Face](https://huggingface.co/) model and dataset ecosystem. 
+
+This code can be found on the notebook: **Lab2-LLMs.ipynb**
 
 ### Exercise 2.1: Installation and text tokenization
 
@@ -40,6 +42,8 @@ sequence = "I enjoy DLA lectures but"
 Token length:6
 Sequence length: 24
 ```
+
+This code can be found on the notebook: **Lab2-LLMs.ipynb**
 
 ### Exercise 2.2: Generating Text
 

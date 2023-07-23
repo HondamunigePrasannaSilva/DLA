@@ -17,17 +17,17 @@ def get_rotten_tomatoes_dataset():
     dataset = load_dataset('rotten_tomatoes', split=['train', 'test'])
     return dataset[0], dataset[1] # train_dataset, test_dataset
 
-config = { 'epochs':25,'lr':0.001,'batch_size':128,'log':'disabled','linear':False }
+config = { 'epochs':10,'lr':0.001,'batch_size':128,'log':'disabled','linear':False }
 
 def main():
         
     parser = argparse.ArgumentParser(description='DiffDefence: main module!')
     
-    parser.add_argument("--epochs",             type=int, default=25, help='num epochs')
+    parser.add_argument("--epochs",             type=int, default=100, help='num epochs')
     parser.add_argument("--lr",                 type=float, default=0.001, help='lr of the linear classifier')
     parser.add_argument("--batch_size",         type=int, default=128, help='batch size')
     parser.add_argument("--log",                type=str, default="disabled", help='to log using ')
-    parser.add_argument("--linear",             type=bool, default=False, help='classifier on top GPT2 ()')
+    parser.add_argument("--linear",             type=bool, default=True, help='classifier on top GPT2 ()')
     
     args = parser.parse_args()
 
@@ -64,7 +64,7 @@ class TextMLP(nn.Module):
             )
         else:
             self.seq = nn.Sequential(
-                nn.Linear(input_dim, output_dim),
+                nn.Linear(input_dim, output_dim, bias=False),
             )
 
     def forward(self, x):

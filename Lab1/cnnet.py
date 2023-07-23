@@ -26,10 +26,10 @@ class block(nn.Module):
 
         x = self.seq(x)
         
-        if self.res == True:
-            x = x+identity
-            x = self.relu(x)
-        
+        #if self.res == True:
+        x = x+identity
+        x = self.relu(x)
+    
         return x
     
 class CNNNet(nn.Module):

@@ -14,7 +14,7 @@ def make_gif(titolo="prova", k = 10):
     
     frame_one = frames[0]
     frame_one.save("Lab1/img/"+str(titolo)+".gif", format="GIF", append_images=frames,
-               save_all=True, duration=200, loop=0)
+               save_all=True, duration=200, loop=1)
 
     """removing_files = glob.glob('Lab1/img/forgif/*.png')
     for i in removing_files:

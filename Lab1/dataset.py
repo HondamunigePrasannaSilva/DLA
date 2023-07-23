@@ -67,8 +67,7 @@ def getDataCifar(batch_size = 32):
     return trainloader, testloader,val_dataloader
 def getSTL(batch_size = 32):
     transform = transforms.Compose(
-    [transforms.ToTensor(),
-     #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    [transforms.ToTensor()
      ])
 
 
@@ -77,6 +76,7 @@ def getSTL(batch_size = 32):
 
     # Split train into train and validation.
     val_size = 2000
+    np.random.seed(5)
     I = np.random.permutation(len(testset))
     ds_val = Subset(testset, I[:val_size])
     ds_test = Subset(testset, I[val_size:])
