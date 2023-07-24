@@ -27,8 +27,7 @@ We will use the functions in `sklearn.metrics` to produce [ROC](https://scikit-l
 In this second exercise we will experiment with FGSM to attack a network and as a defence by trainining the network adversarialy to be (more) robust to adversarial attacks. 
 
 
-Fast Gradient Sign Method (FGSM) perturbs samples in the direction of the gradient with respect to the input $\mathbf{x}$:
-$$ \boldsymbol{\eta}(\mathbf{x}) = \varepsilon \mathrm{sign}(\nabla_{\mathbf{x}} \mathcal{L}(\boldsymbol{\theta}, \mathbf{x}, y)) ) $$
+Fast Gradient Sign Method (FGSM) perturbs samples in the direction of the gradient with respect to the input.
 
 ![](img/all_img.png)
 
@@ -50,7 +49,7 @@ The idea is to target the next class.
 
 ``` classes = ['plane', 'car', 'bird', 'cat','deer', 'dog', 'frog', 'horse', 'ship', 'truck']```
 
-So given an image plane we want to create a sample that the model classify as car, the class immediately next. Obviously it cannot be done in one iteration so we will explore it in different iterations 
+So given an image plane we want to create a sample that the model classify as car, the class immediately next. Obviously it cannot be done in one iteration so we will explore it in different iterations. eps used is **0.015**. 
 
 
 ![](img/all_img_5_1.png)
@@ -58,5 +57,8 @@ So given an image plane we want to create a sample that the model classify as ca
 ![](img/all_img_5_3.png)
 ![](img/all_img_5_4.png)
 ![](img/all_img_5_5.png)
+
+We can observe that in 4/5 steps of target FGSM it is possibile to target the wanted class.
+
 
 

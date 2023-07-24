@@ -86,7 +86,8 @@ $python textClassifcation.py --epochs=20 --linear=True --batch_size=128, --log='
 
 Set log = 'run' if you want to log using wandb
 
-The idea is to finetune using two type of classifier, linear and a non linear.
+The idea is to use `GPT2` as the base to extract useful feature,specifically we will use the last token as it should contain the gloabl information of the sentence andinsert on top it a classifier and finetune this classifier on the dataset rotten tomatoes. 
+
 
 ### Plot using linear vs non linear layer on top of GPT2 model
 

@@ -25,7 +25,7 @@ def main():
     
     parser.add_argument("--epochs",             type=int, default=100, help='num epochs')
     parser.add_argument("--lr",                 type=float, default=0.003, help='lr of the linear classifier')
-    parser.add_argument("--batch_size",         type=int, default=128, help='batch size')
+    parser.add_argument("--batch_size",         type=int, default=64, help='batch size')
     parser.add_argument("--log",                type=str, default="disabled", help='to log using ')
     parser.add_argument("--linear",             type=bool, default=True, help='classifier on top GPT2 ()')
     

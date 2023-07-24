@@ -1,4 +1,4 @@
-#  Laboratory 1 Convolutional neural networks with residual connections
+#  Laboratory 1: Convolutional neural networks with residual connections
 
 This laboratory use relatively simple architectures to deep down on architecture with and without residual.
 
@@ -28,8 +28,11 @@ In this exercise will use [*Class Activation Maps*](http://cnnlocalization.csail
 ![](img/gifs/prova_4_g.gif)
 
 - The second attempt: use the parameter of the predicted class to find where the network focus to predict it.
+
 ![](img/gifs/prova_4_cc.gif)
 
 on the left is the true class and on the right is the class predited from the class at every epoch.
+
+It's interesting noting that the information gather after global average pooling show where the network is looking in general as it sums the spatial information,  before MLP is applied. Meanwhile in the first it showes only the part that the network looks to predict a certain class. And this could be useful for anomaly detection to search where the network focus in general and not only on the predicted class. If the netowrk has '*perfect*' accuracy the two *attention map* should be the same.   
 
 

@@ -18,7 +18,6 @@ from OOD_detection_pipeline import *
 from torch.utils.data import DataLoader , TensorDataset
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-classes = ['airplane','bird','car','cat','deer','dog','horse','monkey','ship','truck']
 
 """
     In this file you can do adversarial training and check if a 
@@ -34,7 +33,7 @@ hyperparameters = {
     'lr' : 0.01, 
     'batch_size' : 256,
     'log':'disabled',
-    'model':'resnet18', # classifier_a or classifier_b
+    'model':'resnet18', # classifier_a or classifier_b if use MNIST
     'adv_train': False,
     'eps':0.015,
     'dataset':'cifar10',
@@ -249,8 +248,9 @@ def targetAttack(times):
 
 if __name__ == "__main__":
     
-    #model_pipeline()
-    
-    targetAttack(4)
+    model_pipeline()
+
+
+    #targetAttack(4)
     
     
