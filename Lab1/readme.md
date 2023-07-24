@@ -9,7 +9,7 @@ Implement a *simple* Multilayer Perceptron to classify the 10 digits of MNIST. T
 ![](img/es1.png)
 
 
-# Convolutional nerual network with residual connection
+## Exercise 2: Convolutional nerual network with residual connection
 Implement a Convolutional nerual network with residual connection to classify the class of CIFAR10.
 
 A simple test to demostrate that deeper networks without residual connection not always work better and **even deeper** ones *with* residual connections.
@@ -18,7 +18,7 @@ A simple test to demostrate that deeper networks without residual connection not
 
 In **red** residual CNN with residual, in **green** CNN without residual.
 
-# Explain the prediction of a CNN
+## Exercise 3: Explain the prediction of a CNN
 In this exercise will use [*Class Activation Maps*](http://cnnlocalization.csail.mit.edu/#:~:text=A%20class%20activation%20map%20for,decision%20made%20by%20the%20CNN.): to view where the network focus to classify.
 
 > B. Zhou, A. Khosla, A. Lapedriza, A. Oliva, and A. Torralba. Learning Deep Features for Discriminative Localization. CVPR'16 (arXiv:1512.04150, 2015).

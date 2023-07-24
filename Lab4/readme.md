@@ -42,7 +42,8 @@ Then we evaluate whether the model is more (or less) robust to ID samples using 
 As we can observe using a model trained using adversarial sample is not useful for OOD, where OOD dataset is the attack sample, the model is not able to discriminate adversarial samples.
 
 ![](img/all_img_6.png)
-But it can used to find ODD (Cifar100) 
+But it can be used to detect ODD (Cifar100), but it is not more robust for OOD detection than a model without adversarial training.
+
 ```
     Validation accuracy: 84.85% 
     test accuracy:  84.8%
