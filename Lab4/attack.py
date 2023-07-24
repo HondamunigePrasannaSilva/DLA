@@ -44,6 +44,8 @@ def fgsm_attack(model, loss_fn, images,labels, eps, target):
 
     # If target i dont want to change the direction
     else:
+        # if target labels are 
+        labels = (labels+1)%10
         loss = loss_fn(outputs, labels)
 
     _, predicted_adv_labels = torch.max(outputs.data, 1)
@@ -58,5 +60,5 @@ def fgsm_attack(model, loss_fn, images,labels, eps, target):
     correct += (predicted_labels == predicted_adv_labels).sum().item()
     total += labels.size(0)
 
-    
+    #model.zero_grad()
     return perturbed_images, 1-correct/total

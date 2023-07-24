@@ -30,14 +30,14 @@ classes = ['airplane','bird','car','cat','deer','dog','horse','monkey','ship','t
 """
 
 hyperparameters = {
-    'epochs' :200, 
+    'epochs' :251, 
     'lr' : 0.01, 
     'batch_size' : 256,
     'log':'disabled',
-    'model':'classifier_a', # classifier_a or classifier_b
+    'model':'resnet18', # classifier_a or classifier_b
     'adv_train': False,
-    'eps':0.03,
-    'dataset':'mnist',
+    'eps':0.015,
+    'dataset':'cifar10',
 }
 
 
@@ -90,7 +90,7 @@ def adv_train(model, criterion, optimizer,trainloader, testloader, validationloa
 
     for epoch in range(config.epochs):
         
-        progress_bar = tqdm(total=len(trainloader),unit='step', desc=f'epoch {epoch}', leave=True)
+        progress_bar = tqdm(total=len(trainloader),unit='step', desc=f'epoch {epoch}', leave=False)
         
         for _, (images, labels) in enumerate(trainloader):
 
@@ -126,7 +126,7 @@ def adv_train(model, criterion, optimizer,trainloader, testloader, validationloa
 
         wandb.log({"epoch":epoch, "loss":np.mean(losses)})
         
-        if epoch%1==0:
+        if epoch%10==0:
             val = test(model, validationloader, criterion)
             acc = test(model, testloader, criterion)
             acc_adv = test(model, testloader, criterion, True)
@@ -163,16 +163,16 @@ def test(model, test_loader,criterion, attack = False):
     
     return correct/total
 
-def createAdversarialImages(model, dataloader,criterion, eps):
+def createAdversarialImages(model, dataloader,criterion, eps, target = False):
         
     for i, (images, label) in enumerate(dataloader):
         images, label = images.to(device), label.to(device)
         if i == 0:    
-            adv_images, _ = fgsm_attack(model, criterion, images,label, eps = eps, target = True)
+            adv_images, _ = fgsm_attack(model, criterion, images,label, eps = eps, target = target)
             l = label
         else:
             
-            adv_images = torch.cat([adv_images,fgsm_attack(model, criterion, images,label, eps = eps, target = False)[0]], dim = 0)
+            adv_images = torch.cat([adv_images,fgsm_attack(model, criterion, images,label, eps = eps, target = target)[0]], dim = 0)
             l = torch.cat([l, label], dim = 0)
     
     # Create a dataloader with fake images and true labels
@@ -180,7 +180,8 @@ def createAdversarialImages(model, dataloader,criterion, eps):
     advtestloader = DataLoader(dataset_, batch_size = 32)
 
     return advtestloader
-    
+
+
 def testAdversarialImages(model, eps):
     
     _,testloader,_ = getDataCifar(batch_size=10)
@@ -209,18 +210,47 @@ def testAdversarialImages(model, eps):
 
     plt.tight_layout()  
     plt.figtext(0.5, 0.05, "Adversarial image after FGSM is applied with different eps", ha='center', fontsize=20)
-    plt.savefig(f"Lab4/img/all_img.png")  # Display the figure
+    plt.savefig(f"Lab4/img/all_img_.png")  # Display the figure
     plt.close()
 
+def targetAttack(times):
+    model = classifiers['resnet18'].to(device)
+    model.load_state_dict(torch.load("/home/hsilva/DLA/cifar10_3.pt"))
+
+    trainloader,testloader,validationloader = getDataCifar(batch_size=hyperparameters['batch_size'])
+    
+    criterion = torch.nn.CrossEntropyLoss()
+
+    for i in range(times):
+        testloader = createAdversarialImages(model, testloader,criterion, hyperparameters['eps'], target = True)
+
+    images, labels = next(iter(testloader))
+    
+    with torch.no_grad():
+            oututs = model(images)
+
+    _, predicated = torch.max(oututs.data, 1)
+    total = labels.size(0)
+    correct = (predicated == labels).sum().item()
+
+    fig, axs = plt.subplots(1, 5, figsize=(15, 4))  
+
+    classes = ['plane', 'car', 'bird', 'cat','deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+    for i in range(5):  
+        axs[i].imshow(images[i].detach().cpu().permute(1,2,0))  
+        axs[i].axis('off')
+        axs[i].set_title(f"{classes[labels[i]]}-{classes[predicated[i]]}", fontsize=20)
+
+    plt.tight_layout()  
+    plt.figtext(0.5, 0.05, f"Adversarial image after target FGSM is applied {times} times", ha='center', fontsize=20)
+    plt.savefig(f"Lab4/img/all_img_5_{times}.png")  # Display the figure
+    plt.close()
 
 
 if __name__ == "__main__":
     
-    model_pipeline()
+    #model_pipeline()
     
-    """model = classifiers['resnet18'].to(device)
-    model.load_state_dict(torch.load("/home/hsilva/DLA/cifar10_3.pt"))
-
-    testAdversarialImages(model, eps=0.03)
-    """
-
+    targetAttack(4)
+    
+    

@@ -3,7 +3,7 @@
 
 In this laboratory we will develop a methodology for detecting OOD samples and measuring the quality of OOD detection.
 
-This laboratory use ad network: `resnet18`
+This laboratory use as network: `resnet18`
 
 ## Exercise 1: OOD Detection and Performance Evaluation
 In this first exercise we will build a simple OOD detection pipeline and implement some performance metrics to evaluate its performance.
@@ -38,10 +38,25 @@ Afterward we use FGSM to augment your training dataset with adversarial samples.
 
 Then we evaluate whether the model is more (or less) robust to ID samples using your OOD detection pipeline and metrics.
 
+![](img/all_img_3.png)
 
+As we can observe using a model trained using adversarial sample is not useful for OOD.
 
 ## Exercise 3: Target FGSM 
 
-Implement the targeted Fast Gradient Sign Method to generate adversarial samples that *imitate* samples from a specific class. Evaluate your adversarial samples qualitatively and quantitatively.
+This last exercise is to implement the targeted Fast Gradient Sign Method to generate adversarial samples that *imitate* samples from a specific class.
 
-da mostrare una figura e i due plot 
+The idea is to target the next class.
+
+``` classes = ['plane', 'car', 'bird', 'cat','deer', 'dog', 'frog', 'horse', 'ship', 'truck']```
+
+So given an image plane we want to create a sample that the model classify as car, the class immediately next. Obviously it cannot be done in one iteration so we will explore it in different iterations 
+
+
+![](img/all_img_5_1.png)
+![](img/all_img_5_2.png)
+![](img/all_img_5_3.png)
+![](img/all_img_5_4.png)
+![](img/all_img_5_5.png)
+
+

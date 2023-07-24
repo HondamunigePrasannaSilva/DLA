@@ -36,7 +36,7 @@ def getDataCifar(batch_size = 32):
     
     transform_train = transforms.Compose([
     transforms.RandomCrop(32, padding=4),
-    transforms.RandomHornonnizontalFlip(),
+    transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
     #transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
@@ -57,7 +57,7 @@ def getDataCifar(batch_size = 32):
     ds_train = Subset(trainset, I[val_size:])
 
     trainloader = torch.utils.data.DataLoader(ds_train, batch_size=batch_size,shuffle=True, num_workers=8)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,shuffle=False, num_workers=8)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,shuffle=False)
     val_dataloader = torch.utils.data.DataLoader(ds_val, batch_size=batch_size,  num_workers=8)
 
 
