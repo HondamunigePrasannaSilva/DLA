@@ -30,13 +30,14 @@ classes = ['airplane','bird','car','cat','deer','dog','horse','monkey','ship','t
 """
 
 hyperparameters = {
-    'epochs' :5, 
+    'epochs' :200, 
     'lr' : 0.01, 
     'batch_size' : 256,
     'log':'disabled',
     'model':'classifier_a', # classifier_a or classifier_b
     'adv_train': False,
-    'eps':0.3
+    'eps':0.03,
+    'dataset':'mnist',
 }
 
 
@@ -48,10 +49,10 @@ def model_pipeline():
         config = wandb.config
 
         #make the model, data and optimization problem
-        model, criterion, optimizer, trainloader, testloader, validationloader = create(config)
+        model, criterion, optimizer,trainloader, testloader, validationloader, scheduler = create(config)
 
         #train the model
-        model_trained = adv_train(model, trainloader, criterion, optimizer, validationloader,testloader, config)
+        model_trained = adv_train(model, criterion, optimizer,trainloader, testloader, validationloader, scheduler,  config)
 
         #test the model
         print("Accuracy test: ",test(model_trained, testloader, criterion))
@@ -60,23 +61,25 @@ def model_pipeline():
 
         # OOD pipeline
         dl_fake = createAdversarialImages(model, testloader,criterion, config.eps)
-        OOD_pipeline(model, testloader, dl_fake , datasetname = 'MNSIT')
+        OOD_pipeline(model, testloader, dl_fake , datasetname = 'cifar')
     return
 
 def create(config):
     
     #Create a model
-    model = classifiers[config.model].to(device)
+
+    model = classifiers['resnet18'].to(device)
     
     #Create the loss and optimizer
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.01,momentum=0.9, weight_decay=5e-4)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=200)
 
-    trainloader,testloader,validationloader = getDataMnist(batch_size=config.batch_size)
+    trainloader,testloader,validationloader = getDataCifar(batch_size=config.batch_size)
 
-    return model, criterion, optimizer,trainloader, testloader, validationloader#, scheduler
+    return model, criterion, optimizer,trainloader, testloader, validationloader, scheduler
 
-def adv_train(model, trainloader, criterion, optimizer, validationloader,testloader, config):
+def adv_train(model, criterion, optimizer,trainloader, testloader, validationloader, scheduler, config):
     
     #telling wand to watch
     if wandb.run is not None:
@@ -132,8 +135,10 @@ def adv_train(model, trainloader, criterion, optimizer, validationloader,testloa
             if config.log == 'disabled':
                 print(f"validation_accuracy:{val}, test_accuracy:{acc},  test_accuracy_adv:{acc_adv}")
 
-            torch.save(model.state_dict(), "./Lab4/Models/advtrainMnist.pt")
+            torch.save(model.state_dict(), f"./Lab4/Models/{config['dataset']}_adv.pt")
         
+        scheduler.step()
+
 
     return model
 
@@ -153,7 +158,9 @@ def test(model, test_loader,criterion, attack = False):
         _, predicated = torch.max(oututs.data, 1)
         total += labels.size(0)
         correct += (predicated == labels).sum().item()
-
+    
+    model.train()
+    
     return correct/total
 
 def createAdversarialImages(model, dataloader,criterion, eps):
@@ -178,13 +185,32 @@ def testAdversarialImages(model, eps):
     
     _,testloader,_ = getDataCifar(batch_size=10)
     images,labels = next(iter(testloader))
-    
+    images,labels = images.to(device),labels.to(device)
+
     criterion = torch.nn.CrossEntropyLoss()
     
-    adv_images, acc = fgsm_attack(model, criterion, images,labels, eps = eps, target = False)
+    eps_ = [0, 0.01, 0.02, 0.03, 0.1]
+
+    img_path = []
+    for i in range(5):
+        adv_images, acc = fgsm_attack(model, criterion, images,labels, eps = eps_[i], target = False)    
+        save_image(adv_images[0],f'./Lab4/img/{eps_[i]}.png')
+        img_path.append(f'./Lab4/img/{eps_[i]}.png')
     
-    save_image(images[0],'./Lab4/imgs/no_adv.png')
-    save_image(adv_images[0],'./Lab4/imgs/adv.png')
+    
+    fig, axs = plt.subplots(1, 5, figsize=(15, 4))  
+
+
+    for i, image_path in enumerate(img_path):
+        img = mpimg.imread(image_path)  
+        axs[i].imshow(img)  
+        axs[i].axis('off')
+        axs[i].set_title(eps_[i], fontsize=20)
+
+    plt.tight_layout()  
+    plt.figtext(0.5, 0.05, "Adversarial image after FGSM is applied with different eps", ha='center', fontsize=20)
+    plt.savefig(f"Lab4/img/all_img.png")  # Display the figure
+    plt.close()
 
 
 
@@ -192,9 +218,9 @@ if __name__ == "__main__":
     
     model_pipeline()
     
-    #model = classifiers['resnet18'].to(device)
-    #model.load_state_dict(torch.load("/home/hsilva/DLA/cifar10.pt"))
+    """model = classifiers['resnet18'].to(device)
+    model.load_state_dict(torch.load("/home/hsilva/DLA/cifar10_3.pt"))
 
-    #testAdversarialImages(model, eps=0.03)
-
+    testAdversarialImages(model, eps=0.03)
+    """
 

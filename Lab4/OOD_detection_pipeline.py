@@ -74,7 +74,7 @@ def train(model, trainloader, criterion, optimizer, validationloader,testloader,
 
     for epoch in range(config.epochs):
         
-        progress_bar = tqdm(total=len(trainloader),unit='step', desc=f'epoch {epoch}', leave=True)
+        progress_bar = tqdm(total=len(trainloader),unit='step', desc=f'epoch {epoch}', leave=False)
         
         for batch, (images, labels) in enumerate(trainloader):
             loss = train_batch(images, labels,model, optimizer, criterion)
@@ -135,7 +135,8 @@ def test(model, test_loader):
             total += labels.size(0)
 
             correct += (predicated == labels).sum().item()
-
+    
+    model.train()
     return correct/total
 
 def OOD_pipeline(model, dl_test, dl_fake , datasetname = 'CIFAR10'):
@@ -155,15 +156,43 @@ def OOD_pipeline(model, dl_test, dl_fake , datasetname = 'CIFAR10'):
 
     y = np.concatenate((np.ones(len(dl_fake.dataset)), np.zeros(len(dl_test.dataset))))
 
-    #list_ID_ = [[logits_ID[i].mean(), logits_ID[i].std()]   for i in range(len(logits_ID)  )]
-    #list_OOD_ = [[logits_OOD[i].mean(), logits_OOD[i].std()] for i in range(len(logits_OOD) )]
-
     # with variance
-    #list_ID_ = [sum(logits_ID[i]) for i in range(len(logits_ID)  )]
-    #list_OOD_ = [sum(logits_OOD[i]) for i in range(len(logits_OOD)  )]
     list_ID_ = [ logits_ID[i].std()   for i in range(len(logits_ID)  )]
     list_OOD_ = [ logits_OOD[i].std() for i in range(len(logits_OOD) )]
     
+    #list_ID_ = [ logits_ID[i].max()   for i in range(len(logits_ID)  )]
+    #list_OOD_ = [ logits_OOD[i].max() for i in range(len(logits_OOD) )]
+
+    scores = list_ID_ + list_OOD_
+
+    RocCurveDisplay.from_predictions( y, scores, name="", color="darkorange",)
+    img_path = []
+    
+    plt.plot([0, 1], [0, 1], "k--", label="chance level (AUC = 0.5)")
+    plt.axis("square")
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title(f"OOD Detetection on {datasetname}")
+    plt.legend()
+    plt.savefig("./Lab4/img/AUROC_1.png")
+    img_path.append(f"./Lab4/img/AUROC_1.png")
+    plt.clf()
+
+
+    precision, recall, _ = precision_recall_curve(y, scores)
+    disp = PrecisionRecallDisplay(precision=precision, recall=recall)
+    disp.plot()
+    plt.xlabel("Recall")
+    plt.ylabel("Precision")
+    plt.title(f"OOD Detetection on {datasetname}")
+    plt.savefig("./Lab4/img/AUPR_1.png")
+    img_path.append(f"./Lab4/img/AUPR_1.png")
+    plt.clf()
+
+
+    list_ID_ = [ logits_ID[i].max()   for i in range(len(logits_ID)  )]
+    list_OOD_ = [ logits_OOD[i].max() for i in range(len(logits_OOD) )]
+
     scores = list_ID_ + list_OOD_
 
     RocCurveDisplay.from_predictions( y, scores, name="", color="darkorange",)
@@ -174,7 +203,8 @@ def OOD_pipeline(model, dl_test, dl_fake , datasetname = 'CIFAR10'):
     plt.ylabel("True Positive Rate")
     plt.title(f"OOD Detetection on {datasetname}")
     plt.legend()
-    plt.savefig("./Lab4/imgs/AUROC.png")
+    plt.savefig("./Lab4/img/AUROC_2.png")
+    img_path.append(f"./Lab4/img/AUROC_2.png")
     plt.clf()
 
 
@@ -184,9 +214,30 @@ def OOD_pipeline(model, dl_test, dl_fake , datasetname = 'CIFAR10'):
     plt.xlabel("Recall")
     plt.ylabel("Precision")
     plt.title(f"OOD Detetection on {datasetname}")
-    plt.legend()
-    plt.savefig("./Lab4/imgs/AUPR.png")
+    
+    plt.savefig("./Lab4/img/AUPR_2.png")
+    img_path.append(f"./Lab4/img/AUPR_2.png")
+
     plt.clf()
+
+    eps_ = ['AUROC_var', 'AUPR_var','AUROC_max', 'AUPR_max']
+
+    
+    
+    fig, axs = plt.subplots(1, 4, figsize=(20, 5))  
+
+
+    for i, image_path in enumerate(img_path):
+        img = mpimg.imread(image_path)  
+        axs[i].imshow(img)  
+        axs[i].axis('off')
+        axs[i].set_title(eps_[i], fontsize=15)
+
+    plt.tight_layout()  
+    plt.figtext(0.5, 0.05, "OOD detection using variance and max logits to determine if OOD", ha='center', fontsize=20)
+    plt.savefig(f"Lab4/img/all_img_3.png")  
+    plt.close()
+
 
 
 
@@ -195,7 +246,7 @@ if __name__ == "__main__":
     #model_pipeline()
     
     model = classifiers['resnet18'].to(device)
-    model.load_state_dict(torch.load("/home/hsilva/DLA/cifar10.pt"))
+    model.load_state_dict(torch.load("/home/hsilva/DLA/cifar10_3.pt"))
 
     _,_,validationloader = getDataCifar(batch_size=256)
     _,_,valloaderOOD = getDataCifar100(batch_size=256)
