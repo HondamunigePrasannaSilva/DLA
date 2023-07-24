@@ -10,7 +10,7 @@ In this first exercise we will build a simple OOD detection pipeline and impleme
 
 Implement an OOD detection pipeline using an ID and an OOD dataset:
 
-+ CIFAR-10 (ID), Subset of CIFAR-100 (OOD). 
++ CIFAR-10 (ID), CIFAR-100 (OOD). 
 
 *OOD Detector* use a score representing how "out of distribution" a test sample is. We will explore two function to create this score:
 - Use the max logits to detect OOD
@@ -39,7 +39,15 @@ Then we evaluate whether the model is more (or less) robust to ID samples using 
 
 ![](img/all_img_3.png)
 
-As we can observe using a model trained using adversarial sample is not useful for OOD.
+As we can observe using a model trained using adversarial sample is not useful for OOD, where OOD dataset is the attack sample, the model is not able to discriminate adversarial samples.
+
+![](img/all_img_6.png)
+But it can used to find ODD (Cifar100) 
+```
+    Validation accuracy: 84.85% 
+    test accuracy:  84.8%
+    Test accuracy on adversarial samples: 35.85%
+```
 
 ## Exercise 3: Target FGSM 
 

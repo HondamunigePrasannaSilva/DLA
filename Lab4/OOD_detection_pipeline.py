@@ -235,7 +235,7 @@ def OOD_pipeline(model, dl_test, dl_fake , datasetname = 'CIFAR10'):
 
     plt.tight_layout()  
     plt.figtext(0.5, 0.05, "OOD detection using variance and max logits to determine if OOD", ha='center', fontsize=20)
-    plt.savefig(f"Lab4/img/all_img_3.png")  
+    plt.savefig(f"Lab4/img/all_img_6.png")  
     plt.close()
 
 

@@ -29,13 +29,13 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 """
 
 hyperparameters = {
-    'epochs' :251, 
+    'epochs' :151, 
     'lr' : 0.01, 
     'batch_size' : 256,
     'log':'disabled',
     'model':'resnet18', # classifier_a or classifier_b if use MNIST
     'adv_train': False,
-    'eps':0.015,
+    'eps':0.01,
     'dataset':'cifar10',
 }
 
@@ -59,8 +59,10 @@ def model_pipeline():
         print("Accuracy test on perturbated images: ",test(model_trained, testloader, criterion, attack = True))
 
         # OOD pipeline
-        dl_fake = createAdversarialImages(model, testloader,criterion, config.eps)
-        OOD_pipeline(model, testloader, dl_fake , datasetname = 'cifar')
+        #dl_fake = createAdversarialImages(model, testloader,criterion, config.eps)
+        _,_,valloaderOOD = getDataCifar100(batch_size=hyperparameters['batch_size'])
+
+        OOD_pipeline(model, validationloader, valloaderOOD , datasetname = 'cifar')
     return
 
 def create(config):
