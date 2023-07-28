@@ -67,14 +67,17 @@ Using the generate function with beam.
 ```
 4 - I enjoy DLA lectures but I don't think I've ever been able to get to the point where I feel like I'm in the right place."
 
-with temperture = 0.9
+with temperature = 0.9
 5 - I enjoy DLA lectures but I don't think I've ever been in a class like this before."
 ```
+Beam search evaluates more paths and chooses the more probable, infact fact finds a more interesting sequence, meanwhile, greed search selects the most probable word at each time step.
+
+Increasing the temperature, so the entropy, the distribution approaches uniform distribution giving each word an equal probability of getting sampled out, thereby rendering a more creative look to the generated sequence.
 
 ## Exercise 3
 This code can be found **textClassification.py**
 
-Finetuning GPT2 model for text classification on **rotten tomatoes** dataset using a linear classifier and a non linear classifier. Model and dataset from hugging face.
+Finetuning GPT2 model for text classification on **rotten tomatoes** dataset using a linear classifier and a non-linear classifier. Model and dataset from hugging face.
 
 **rotten tomatoes** : Movie review dataset with positive/negative label
 
