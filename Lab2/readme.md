@@ -89,7 +89,7 @@ $python textClassifcation.py --epochs=20 --linear=True --batch_size=128, --log='
 
 Set log = 'run' if you want to log using wandb
 
-The idea is to use `GPT2` as the base to extract useful feature,specifically we will use the last token as it should contain the global information of the sentence and insert on top of it a classifier and finetune this classifier on the dataset rotten tomatoes. 
+The idea is to use `GPT2` as the base to extract useful feature,specifically we will use the last hiddenstate as it should contain the global information of the sentence and insert on top of it a classifier and finetune this classifier on the dataset rotten tomatoes. 
 
 
 ### Plot using linear vs non linear layer on top of GPT2 model
