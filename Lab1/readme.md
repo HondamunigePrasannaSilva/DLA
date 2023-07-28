@@ -25,11 +25,11 @@ In this exercise will use [*Class Activation Maps*](http://cnnlocalization.csail
 
 - This first attempt:  use the parameter of the predicted class to find where the network focus to predict it.
  
-![](img/gifs/prova_4_g.gif)
+![](img/gifs/targetclass.gif)
 
 - The second attempt: use the parameters of the global average pool, to understand where the network focus globaly.
 
-![](img/gifs/prova_4_cc.gif)
+![](img/gifs/gap.gif)
 
 on the left is the true class and on the right is the class predited from the class at every epoch.
 
