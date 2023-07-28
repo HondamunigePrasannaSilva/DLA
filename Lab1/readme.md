@@ -23,11 +23,11 @@ In this exercise will use [*Class Activation Maps*](http://cnnlocalization.csail
 
 > B. Zhou, A. Khosla, A. Lapedriza, A. Oliva, and A. Torralba. Learning Deep Features for Discriminative Localization. CVPR'16 (arXiv:1512.04150, 2015).
 
-- This first attempt:  use the parameters of the global average pool, to understand where the network focus globaly.
+- This first attempt:  use the parameter of the predicted class to find where the network focus to predict it.
  
 ![](img/gifs/prova_4_g.gif)
 
-- The second attempt: use the parameter of the predicted class to find where the network focus to predict it.
+- The second attempt: use the parameters of the global average pool, to understand where the network focus globaly.
 
 ![](img/gifs/prova_4_cc.gif)
 
